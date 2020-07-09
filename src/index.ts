@@ -5,14 +5,14 @@ import {convolute, createKernel3x3x1Values, createKernel3x3x3Values} from "./gri
 var Jimp = require('jimp');
 
 
-const d = 200
+const d = 100
 
 const dh = d / 2;
-const dw = 15;
+const dw = 4;
 
 const experiment = {
 
-    dim: {x: d, y: d, z: 1},
+    dim: {x: d, y: d, z: d},
     dA: 1,
     dB: 0.5,
     feed: 0.055,
@@ -27,8 +27,8 @@ const mediumB1 = grid3d(experiment.dim)
 const mediumA2 = grid3d(experiment.dim)
 const mediumB2 = grid3d(experiment.dim)
 
-//const kernel = convolute(grid3d({x: 3, y: 3, z: 3}, new Float32Array(createKernel3x3x3Values())));
-const kernel = convolute(grid3d({x: 3, y: 3, z: 1}, new Float32Array(createKernel3x3x1Values())));
+const kernel = convolute(grid3d({x: 3, y: 3, z: 3}, new Float32Array(createKernel3x3x3Values())));
+//const kernel = convolute(grid3d({x: 3, y: 3, z: 1}, new Float32Array(createKernel3x3x1Values())));
 
 
 for (let i = 0; i < mediumA1.arr.length; i++) {
@@ -42,8 +42,8 @@ for (let i = 0; i < mediumA1.arr.length; i++) {
 
 
 for (let x = dh - dw; x < dh + dw; x++) {
-    for (let y = dh - dw; y < dh + dw - 1; y++) {
-        for (let z = 0; z < 1; z++) {
+    for (let y = dh - dw; y < dh + dw; y++) {
+        for (let z = dh - dw; z < dh + dw; z++) {
             const index = mediumB1.index(x, y, z)
             mediumB1.arr[index] = 1;
             mediumB2.arr[index] = 1;
@@ -53,10 +53,10 @@ for (let x = dh - dw; x < dh + dw; x++) {
 }
 
 
-for (let iteration = 0; iteration < 1000; iteration += 2) {
+for (let iteration = 0; iteration < 100; iteration += 2) {
 
     console.time("pass")
-    for (let z = 0; z < 1; z++) {
+    for (let z = 1; z < experiment.dim.z; z++) {
         for (let y = 1; y < experiment.dim.y - 1; y++) {
             for (let x = 1; x < experiment.dim.x - 1; x++) {
 
@@ -80,7 +80,7 @@ for (let iteration = 0; iteration < 1000; iteration += 2) {
             }
         }
     }
-    for (let z = 0; z < 1; z++) {
+    for (let z = 1; z < experiment.dim.z; z++) {
         for (let y = 1; y < experiment.dim.y - 1; y++) {
             for (let x = 1; x < experiment.dim.x - 1; x++) {
 
@@ -133,9 +133,9 @@ let fileContent = ""
 
 new Jimp(d, d, (err, image) => {
 
-    let z = 0
-    for (let x = 1; x < experiment.dim.x - 1; x++) {
-        for (let y = 1; y < experiment.dim.y - 1; y++) {
+    let z = dh
+    for (let x = 0; x < experiment.dim.x ; x++) {
+        for (let y = 0; y < experiment.dim.y ; y++) {
 
 
             const index = mediumA1.index(x, y, z)

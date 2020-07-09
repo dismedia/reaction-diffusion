@@ -5,12 +5,11 @@ export const convolute =
     (kernel: Grid3d) =>
 
 
-
         (source: Grid3d, px, py, pz) => {
 
-            const kernelOffsetX=1
-            const kernelOffsetY=1
-            const kernelOffsetZ=0
+            const kernelOffsetX = 1
+            const kernelOffsetY = 1
+            const kernelOffsetZ = 1
 
             let value = 0
             for (let x = 0; x < kernel.dim.x; x++) {
@@ -58,7 +57,14 @@ export const createKernel3x3x3Values = () => {
 
                 const distSq = dx ** 2 + dy ** 2 + dz ** 2;
                 const v = Math.exp(-distSq)
-                distSum += v
+
+
+                if(dx==0 && dy==0 && dz==0){
+
+                }else{
+                    distSum += v
+                }
+
 
                 kernel[index3x3(x, y, z)] = v;
 
@@ -66,16 +72,47 @@ export const createKernel3x3x3Values = () => {
         }
     }
 
+    console.log("dist sum", distSum)
+
+
+
+    kernel[index3x3(1, 1, 1)] = -distSum;
+
     for (let i = 0; i < 27; i++) {
         kernel[i] /= distSum;
     }
 
-    console.log("distsum", distSum)
 
-    kernel[index3x3(1, 1, 1)] = -1
 
-    return kernel
 
+    let g=0;
+    for (let i = 0; i < 27; i++) {
+        g+=kernel[i];
+    }
+
+    console.log("kernel sum", g)
+
+
+
+
+    // const ov = [
+    //
+    //     0,0,0,
+    //     0,1.3,0,
+    //     0,0,0,
+    //
+    //     0.05, 0.13, 0.05,
+    //     0.13, -1, 0.13,
+    //     0.05, 0.13, 0.05,
+    //
+    //     0,0,0,
+    //     0,1.3,0,
+    //     0,0,0,
+    //
+    //
+    // ]
+
+    return kernel;
 
 }
 
