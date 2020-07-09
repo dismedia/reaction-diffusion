@@ -1,5 +1,5 @@
 import {grid3d} from "../../grid";
-import {convolute3x3} from "./convolute";
+import {convolute} from "./convolute";
 
 
 describe("convolute", () => {
@@ -16,7 +16,7 @@ describe("convolute", () => {
         ));
 
 
-        const kernel = convolute3x3(grid3d({x: 3, y: 3, z: 1},
+        const kernel = convolute(grid3d({x: 3, y: 3, z: 1},
             new Float32Array(
                 [
                     1, 1, 1,

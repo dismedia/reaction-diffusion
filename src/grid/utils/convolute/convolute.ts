@@ -1,17 +1,22 @@
 import {Grid3d} from "../../../domain/domain";
+import {index3x3} from "../index";
 
-export const convolute3x3 =
+export const convolute =
     (kernel: Grid3d) =>
 
 
 
         (source: Grid3d, px, py, pz) => {
 
+            const kernelOffsetX=1
+            const kernelOffsetY=1
+            const kernelOffsetZ=0
+
             let value = 0
             for (let x = 0; x < kernel.dim.x; x++) {
                 for (let y = 0; y < kernel.dim.y; y++) {
                     for (let z = 0; z < kernel.dim.z; z++) {
-                        value +=kernel.arr[kernel.index(x,y,z)]* source.arr[source.index(px - 1 + x, py - 1 + y, pz - 1 + z)]
+                        value += kernel.arr[kernel.index(x, y, z)] * source.arr[source.index(px - kernelOffsetX + x, py - kernelOffsetY + y, pz - kernelOffsetZ + z)]
                     }
                 }
             }
@@ -20,9 +25,21 @@ export const convolute3x3 =
         }
 
 
-export const createKernel9x9Values = () => {
+export const createKernel3x3x1Values = () => {
 
-    const kernel = []
+
+    return [
+        0.05, 0.2, 0.05,
+        0.2, -1, 0.2,
+        0.05, 0.2, 0.05
+    ]
+
+
+}
+
+export const createKernel3x3x3Values = () => {
+
+    const kernel: number[] = [];
 
 
     let distSum = 0;
