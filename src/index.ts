@@ -1,22 +1,27 @@
 import {Vector3d} from "./domain/domain";
 import {grid3d} from "./grid/grid";
-import {convolute, createKernel3x3x1Values, createKernel3x3x3Values} from "./grid/utils/convolute/convolute";
+import {
+    convolute,
+    convolute2,
+    createKernel3x3x1Values,
+    createKernel3x3x3Values
+} from "./grid/utils/convolute/convolute";
 
 var Jimp = require('jimp');
 
 
-const d = 100
+const d = 40
 
 const dh = d / 2;
-const dw = 4;
+const dw = 2;
 
 const experiment = {
 
     dim: {x: d, y: d, z: d},
-    dA: 1,
-    dB: 0.5,
-    feed: 0.055,
-    k: 0.062
+    dA: 0.2097,
+    dB: 0.105,
+    feed: 0.035,
+    k: 0.060
 
 }
 
@@ -27,11 +32,13 @@ const mediumB1 = grid3d(experiment.dim)
 const mediumA2 = grid3d(experiment.dim)
 const mediumB2 = grid3d(experiment.dim)
 
-const kernel = convolute(grid3d({x: 3, y: 3, z: 3}, new Float32Array(createKernel3x3x3Values())));
+const kernel = convolute2(grid3d({x: 3, y: 3, z: 3}, new Float32Array(createKernel3x3x3Values())), {x: 1, y: 1, z: 1});
 //const kernel = convolute(grid3d({x: 3, y: 3, z: 1}, new Float32Array(createKernel3x3x1Values())));
 
 
 for (let i = 0; i < mediumA1.arr.length; i++) {
+
+    let g = Math.random();
 
     mediumA1.arr[i] = 1;
     mediumA2.arr[i] = 1;
@@ -45,20 +52,23 @@ for (let x = dh - dw; x < dh + dw; x++) {
     for (let y = dh - dw; y < dh + dw; y++) {
         for (let z = dh - dw; z < dh + dw; z++) {
             const index = mediumB1.index(x, y, z)
-            mediumB1.arr[index] = 1;
-            mediumB2.arr[index] = 1;
+
+            let g = Math.random();
+
+            mediumB1.arr[index] = g;
+            mediumB2.arr[index] = g;
 
         }
     }
 }
 
 
-for (let iteration = 0; iteration < 100; iteration += 2) {
+for (let iteration = 0; iteration < 256; iteration += 2) {
 
     console.time("pass")
-    for (let z = 1; z < experiment.dim.z; z++) {
-        for (let y = 1; y < experiment.dim.y - 1; y++) {
-            for (let x = 1; x < experiment.dim.x - 1; x++) {
+    for (let z = 1; z < experiment.dim.z - 2; z++) {
+        for (let y = 1; y < experiment.dim.y - 2 - 1; y++) {
+            for (let x = 1; x < experiment.dim.x - 2 - 1; x++) {
 
 
                 const index = mediumA1.index(x, y, z)
@@ -68,6 +78,10 @@ for (let iteration = 0; iteration < 100; iteration += 2) {
 
                 const da = experiment.dA * kernel(mediumA1, x, y, z) - a * b * b + experiment.feed * (1 - a);
                 const db = experiment.dB * kernel(mediumB1, x, y, z) + a * b * b - (experiment.k + experiment.feed) * b
+
+                if (isNaN(da) || isNaN(db)) {
+                    debugger
+                }
 
                 mediumA2.arr[index] = Math.max(Math.min(a + da, 1), 0);
                 mediumB2.arr[index] = Math.max(Math.min(b + db, 1), 0);
@@ -80,9 +94,9 @@ for (let iteration = 0; iteration < 100; iteration += 2) {
             }
         }
     }
-    for (let z = 1; z < experiment.dim.z; z++) {
-        for (let y = 1; y < experiment.dim.y - 1; y++) {
-            for (let x = 1; x < experiment.dim.x - 1; x++) {
+    for (let z = 1; z < experiment.dim.z - 2; z++) {
+        for (let y = 1; y < experiment.dim.y - 2; y++) {
+            for (let x = 1; x < experiment.dim.x - 2; x++) {
 
 
                 const index = mediumA2.index(x, y, z)
@@ -92,6 +106,10 @@ for (let iteration = 0; iteration < 100; iteration += 2) {
 
                 const da = experiment.dA * kernel(mediumA2, x, y, z) - a * b * b + experiment.feed * (1 - a)
                 const db = experiment.dB * kernel(mediumB2, x, y, z) + a * b * b - (experiment.k + experiment.feed) * b
+
+                if (isNaN(da) || isNaN(db)) {
+                    debugger
+                }
 
                 mediumA1.arr[index] = Math.max(Math.min(a + da, 1), 0);
                 mediumB1.arr[index] = Math.max(Math.min(b + db, 1), 0);
@@ -112,30 +130,30 @@ for (let iteration = 0; iteration < 100; iteration += 2) {
 
 let fileContent = ""
 
-// for (let x = 1; x < experiment.dim.x - 1; x++) {
-//     for (let y = 1; y < experiment.dim.y - 1; y++) {
-//         for (let z = 1; z < experiment.dim.z - 1; z++) {
-//
-//             const index = mediumA1.index(x, y, z)
-//             const a = mediumA1.arr[index];
-//             const b = mediumB1.arr[index];
-//
-//             const v=a-b;
-//             if(v<0.2){
-//                 fileContent+=`v ${x} ${y} ${z} \n`
-//             }
-//
-//
-//         }
-//     }
-// }
+for (let x = 1; x < experiment.dim.x - 1; x++) {
+    for (let y = 1; y < experiment.dim.y - 1; y++) {
+        for (let z = 1; z < experiment.dim.z - 1; z++) {
+
+            const index = mediumA1.index(x, y, z)
+            const a = mediumA1.arr[index];
+            const b = mediumB1.arr[index];
+
+            const v = a - b;
+            if (v < 0.2) {
+                fileContent += `v ${x} ${y} ${z} \n`
+            }
+
+
+        }
+    }
+}
 
 
 new Jimp(d, d, (err, image) => {
 
     let z = dh
-    for (let x = 0; x < experiment.dim.x ; x++) {
-        for (let y = 0; y < experiment.dim.y ; y++) {
+    for (let x = 0; x < experiment.dim.x; x++) {
+        for (let y = 0; y < experiment.dim.y; y++) {
 
 
             const index = mediumA1.index(x, y, z)
@@ -144,7 +162,7 @@ new Jimp(d, d, (err, image) => {
             const a = mediumA1.arr[index];
             const b = mediumB1.arr[index];
 
-            const v = Math.floor(Math.max(Math.min((a - b), 1), 0) * 255)
+            const v = Math.floor(Math.max(Math.min((a), 1), 0) * 255)
 
             //console.log(index ,a,b,v);
 
@@ -159,7 +177,7 @@ new Jimp(d, d, (err, image) => {
 
         }
     }
-    image.write('lena-small-bw.png');
+    image.write('out.png');
 });
 
 

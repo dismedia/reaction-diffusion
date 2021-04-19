@@ -1,15 +1,16 @@
-import {Grid3d} from "../../../domain/domain";
+import {Grid3d, Vector3d} from "../../../domain/domain";
 import {index3x3} from "../index";
 
 export const convolute =
-    (kernel: Grid3d) =>
+    (kernel: Grid3d, kernelOffset: Vector3d) => {
 
 
-        (source: Grid3d, px, py, pz) => {
+        const kernelOffsetX = kernelOffset.x;
+        const kernelOffsetY = kernelOffset.y;
+        const kernelOffsetZ = kernelOffset.z;
 
-            const kernelOffsetX = 1
-            const kernelOffsetY = 1
-            const kernelOffsetZ = 1
+        return (source: Grid3d, px, py, pz) => {
+
 
             let value = 0
             for (let x = 0; x < kernel.dim.x; x++) {
@@ -22,6 +23,67 @@ export const convolute =
 
             return value;
         }
+
+    }
+
+
+export const convolute2 =
+    (kernel: Grid3d, kernelOffset: Vector3d) => {
+
+
+
+
+        return (source: Grid3d, px, py, pz) => {
+
+            //corners
+            return 0.01177 *
+                (
+                    source.arr[source.index(px - 1, py - 1, pz + 1)] +
+                    source.arr[source.index(px - 1, py + 1, pz - 1)] +
+                    source.arr[source.index(px - 1, py + 1, pz + 1)] +
+                    source.arr[source.index(px - 1, py - 1, pz - 1)] +
+
+                    source.arr[source.index(px + 1, py - 1, pz + 1)] +
+                    source.arr[source.index(px + 1, py + 1, pz - 1)] +
+                    source.arr[source.index(px + 1, py + 1, pz + 1)] +
+                    source.arr[source.index(px + 1, py - 1, pz - 1)]) +
+
+                0.03199720830744078 * (
+
+                    source.arr[source.index(px, py - 1, pz - 1)] +
+                    source.arr[source.index(px, py - 1, pz + 1)] +
+                    source.arr[source.index(px, py + 1, pz - 1)] +
+                    source.arr[source.index(px, py + 1, pz + 1)] +
+
+
+                    source.arr[source.index(px - 1, py, pz - 1)] +
+                    source.arr[source.index(px - 1, py, pz + 1)] +
+                    source.arr[source.index(px + 1, py, pz - 1)] +
+                    source.arr[source.index(px + 1, py, pz + 1)] +
+
+
+                    source.arr[source.index(px - 1, py - 1, pz)] +
+                    source.arr[source.index(px - 1, py + 1, pz)] +
+                    source.arr[source.index(px + 1, py - 1, pz)] +
+                    source.arr[source.index(px + 1, py + 1, pz)]
+
+                ) +
+                0.08697742990353506 * (
+
+                    source.arr[source.index(px, py, pz - 1)] +
+                    source.arr[source.index(px, py, pz + 1)] +
+
+                    source.arr[source.index(px + 1, py, pz)] +
+                    source.arr[source.index(px - 1, py, pz)] +
+
+                    source.arr[source.index(px, py + 1, pz)] +
+                    source.arr[source.index(px, py - 1, pz)]
+                )
+
+
+        }
+
+    }
 
 
 export const createKernel3x3x1Values = () => {
@@ -59,9 +121,9 @@ export const createKernel3x3x3Values = () => {
                 const v = Math.exp(-distSq)
 
 
-                if(dx==0 && dy==0 && dz==0){
+                if (dx == 0 && dy == 0 && dz == 0) {
 
-                }else{
+                } else {
                     distSum += v
                 }
 
@@ -72,9 +134,6 @@ export const createKernel3x3x3Values = () => {
         }
     }
 
-    console.log("dist sum", distSum)
-
-
 
     kernel[index3x3(1, 1, 1)] = -distSum;
 
@@ -83,14 +142,14 @@ export const createKernel3x3x3Values = () => {
     }
 
 
-
-
-    let g=0;
+    let g = 0;
     for (let i = 0; i < 27; i++) {
-        g+=kernel[i];
+        g += kernel[i];
     }
 
     console.log("kernel sum", g)
+    console.log("kernel", kernel)
+
 
 
 
